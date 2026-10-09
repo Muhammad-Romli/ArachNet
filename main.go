@@ -1,22 +1,31 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/muhammad-romli/ArachNet/internal/config"
 )
 
-func retryLoop[A any](func(A)) (data, err) {
-	maxRetries := 2
-
+func readLoop(maxRetries int, data *config.Config, err error) {
 	for attempt := 0; attempt < maxRetries; attempt++ {
-		data, err := config.Read()
+		data, err = config.Read()
 		if err == nil {
 			break
 		}
-
+		fmt.Printf("Retrying reading")
+	}
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 }
 
 func main() {
-	var data config.Config
-
+	maxRetries := 2
+	var data *config.Config
+	var err error
+	readLoop(maxRetries, data, err)
+	// The data is just place holder in the first readLoop
+	data.SetUser("Justicar")
+	readLoop(maxRetries, data, err)
 }
