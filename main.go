@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/muhammad-romli/ArachNet/internal/config"
 )
@@ -25,6 +26,14 @@ func readLoop(maxRetries int) *config.Config {
 }
 
 func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("Enter the command to start using the CLI applications")
+		fmt.Println("usage: app <command> <param>")
+		return
+	}
+	commandName := os.Args[1]
+	commandParams := os.Args[2:]
+
 	maxRetries := 2
 	data := readLoop(maxRetries)
 	if data == nil {
@@ -32,6 +41,12 @@ func main() {
 		return
 	}
 	// The data is just placeholder in the first readLoop
-	data.SetUser("Justicar")
-	fmt.Println(readLoop(maxRetries))
+
+	mainCommands := commands{CommandsMap: make(map[string]func(*state, command) error)}
+	mainCommands.register("login", handlerLogin)
+	mainState := state{}
+	mainState.ConfigState = data
+
+	cmd := command{commandName, commandParams}
+	mainCommands.run(&mainState, cmd)
 }
