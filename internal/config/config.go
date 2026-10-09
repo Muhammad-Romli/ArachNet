@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 const configFileName = "gatorconfig.json"
@@ -18,7 +19,7 @@ func getConfigPath() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed getting the home directory path: %w", err)
 	}
-	fullPath := homeDir + configFileName
+	fullPath := filepath.Join(homeDir, configFileName)
 	return fullPath, nil
 }
 func Read() (*Config, error) {

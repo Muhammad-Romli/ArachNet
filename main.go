@@ -6,26 +6,32 @@ import (
 	"github.com/muhammad-romli/ArachNet/internal/config"
 )
 
-func readLoop(maxRetries int, data *config.Config, err error) {
+func readLoop(maxRetries int) *config.Config {
+	var data *config.Config
+	var err error
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		data, err = config.Read()
 		if err == nil {
 			break
 		}
-		fmt.Printf("Retrying reading")
+		fmt.Printf("Retrying reading\n")
 	}
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil
 	}
+
+	return data
 }
 
 func main() {
 	maxRetries := 2
-	var data *config.Config
-	var err error
-	readLoop(maxRetries, data, err)
-	// The data is just place holder in the first readLoop
+	data := readLoop(maxRetries)
+	if data == nil {
+		fmt.Printf("There is no data inside targeted file")
+		return
+	}
+	// The data is just placeholder in the first readLoop
 	data.SetUser("Justicar")
-	readLoop(maxRetries, data, err)
+	fmt.Println(readLoop(maxRetries))
 }
