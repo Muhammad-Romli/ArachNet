@@ -46,8 +46,14 @@ func handlerLogin(s *state, cmd command) error {
 	if len(cmd.Args) < 1 { // main.go already take care of the Args of the command so param start from 0
 		return fmt.Errorf("Login function need 1 parameter at least")
 	}
-	s.cfg.SetUser(cmd.Args[0])
-	fmt.Println("User has been set")
+	name := cmd.Args[0]
+	user, err := s.db.GetUser(context.Background(), name)
+	if err != nil {
+		return fmt.Errorf("failed getting user data, name might not exist: %w", err)
+	}
+	s.cfg.SetUser(name)
+	fmt.Println("User has been set:")
+	fmt.Println(user)
 	return nil
 }
 
