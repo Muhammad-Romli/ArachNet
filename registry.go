@@ -1,13 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"time"
 
+	"github.com/google/uuid"
+
+	_ "github.com/lib/pq"
 	"github.com/muhammad-romli/ArachNet/internal/config"
+	"github.com/muhammad-romli/ArachNet/internal/database"
 )
 
 type state struct {
-	ConfigState *config.Config
+	db  *database.Queries
+	cfg *config.Config
 }
 
 type command struct {
@@ -36,10 +43,35 @@ func (c *commands) register(name string, f func(*state, command) error) {
 }
 
 func handlerLogin(s *state, cmd command) error {
-	if len(cmd.Args) < 1 {
+	if len(cmd.Args) < 1 { // main.go already take care of the Args of the command so param start from 0
 		return fmt.Errorf("Login function need 1 parameter at least")
 	}
-	s.ConfigState.SetUser(cmd.Args[0])
-	fmt.Printf("User has been set")
+	s.cfg.SetUser(cmd.Args[0])
+	fmt.Println("User has been set")
+	return nil
+}
+
+func handlerRegister(s *state, cmd command) error {
+	if len(cmd.Args) < 1 {
+		return fmt.Errorf("Register function need 1 parameter at least")
+	}
+	id := uuid.New()
+	createdAt := time.Now()
+	updatedAt := time.Now()
+	name := cmd.Args[0]
+	userParam := database.CreateUserParams{
+		ID:        id,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+		Name:      name,
+	}
+
+	user, err := s.db.CreateUser(context.Background(), userParam)
+	if err != nil {
+		return fmt.Errorf("failed inserting user to database %w", err)
+	}
+	s.cfg.CurrentUserName = name
+	fmt.Printf("User is created, congratulations!\n")
+	fmt.Println(user)
 	return nil
 }
