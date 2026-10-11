@@ -10,3 +10,6 @@ RETURNING *;
 
 -- name: GetUser :one
 SELECT * FROM users WHERE name = $1;
+
+-- name: ResetTable :exec 
+TRUNCATE TABLE users;

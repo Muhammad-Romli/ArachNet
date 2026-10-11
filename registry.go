@@ -76,7 +76,7 @@ func handlerRegister(s *state, cmd command) error {
 	if err != nil {
 		return fmt.Errorf("failed inserting user to database %w", err)
 	}
-	s.cfg.CurrentUserName = name
+	s.cfg.SetUser(name)
 	fmt.Printf("User is created, congratulations!\n")
 	fmt.Println(user)
 	return nil
