@@ -13,7 +13,7 @@ import (
 var maxRetries = 2
 
 func main() {
-	if len(os.Args) < 3 {
+	if len(os.Args) < 2 {
 		fmt.Println("Enter the command to start using the CLI applications")
 		fmt.Println("usage: app <command> <param>")
 		os.Exit(1)
