@@ -81,3 +81,10 @@ func handlerRegister(s *state, cmd command) error {
 	fmt.Println(user)
 	return nil
 }
+
+func handlerReset(s *state, cmd command) error {
+	if err := s.db.ResetTable(context.Background()); err != nil {
+		return fmt.Errorf("failed resetting the table: %w", err)
+	}
+	return nil
+}

@@ -37,8 +37,11 @@ func main() {
 	}
 	dbQueries := database.New(db)
 	mainCommands := commands{CommandsMap: make(map[string]func(*state, command) error)}
+
 	mainCommands.register("login", handlerLogin)
 	mainCommands.register("register", handlerRegister)
+	mainCommands.register("reset", handlerReset)
+
 	mainState := state{}
 	mainState.cfg = data
 	mainState.db = dbQueries
