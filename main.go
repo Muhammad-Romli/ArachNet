@@ -41,6 +41,7 @@ func main() {
 	mainCommands.register("login", handlerLogin)
 	mainCommands.register("register", handlerRegister)
 	mainCommands.register("reset", handlerReset)
+	mainCommands.register("users", handlerUsers)
 
 	mainState := state{}
 	mainState.cfg = data
