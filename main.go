@@ -59,9 +59,9 @@ func OpenSQL(usn string, dbURL string) (*sql.DB, error) {
 	for retries < maxRetries {
 		db, err := sql.Open(usn, dbURL)
 		if err == nil {
-			return db, err // CHANGED: return the pointer, not *db
+			return db, err
 		}
-		retries++ // CHANGED: was never incremented, so it looped forever on failure
+		retries++
 		fmt.Printf("Retrying connecting to databases")
 	}
 	return nil, fmt.Errorf("can't connect to database")

@@ -78,7 +78,8 @@ func handlerRegister(s *state, cmd command) error {
 	}
 	s.cfg.SetUser(name)
 	fmt.Printf("User is created, congratulations!\n")
-	fmt.Println(user)
+	fmt.Println("User ID:", user.ID)
+	fmt.Println("User Name:", user.Name)
 	return nil
 }
 
@@ -101,5 +102,35 @@ func handlerUsers(s *state, cmd command) error {
 		}
 		fmt.Printf("\n")
 	}
+	return nil
+}
+
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.Args) < 2 { // main.go already take care of the Args of the command so param start from 0
+		return fmt.Errorf("login function need 2 parameters at least, name and url")
+	}
+	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	if err != nil {
+		return fmt.Errorf("fail getting user info: %w", err)
+	}
+
+	feedParams := database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      cmd.Args[0],
+		Url:       cmd.Args[1],
+		UserID:    user.ID,
+	}
+
+	feed, err := s.db.CreateFeed(context.Background(), feedParams)
+	if err != nil {
+		return fmt.Errorf("fail creating feed: %w", err)
+	}
+
+	fmt.Println("Feed successfully created")
+	fmt.Println("Feed ID:", feed.ID)
+	fmt.Println("Feed Name:", feed.Name)
+	fmt.Println("Feed Url:", feed.Url)
 	return nil
 }
