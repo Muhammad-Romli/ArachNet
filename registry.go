@@ -105,6 +105,20 @@ func handlerUsers(s *state, cmd command) error {
 	return nil
 }
 
+func aggregate(s *state, cmd command) error {
+	rssStruct, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return fmt.Errorf("error while fetching data: %w", err)
+	}
+	processXML(rssStruct)
+	for _, item := range rssStruct.Channel.Item {
+		fmt.Println(item.Title)
+		fmt.Println(item.Description)
+		fmt.Printf("\n----------------------------------------------------\n")
+	}
+	return nil
+}
+
 func handlerAddFeed(s *state, cmd command) error {
 	if len(cmd.Args) < 2 { // main.go already take care of the Args of the command so param start from 0
 		return fmt.Errorf("login function need 2 parameters at least, name and url")
@@ -132,19 +146,5 @@ func handlerAddFeed(s *state, cmd command) error {
 	fmt.Println("Feed ID:", feed.ID)
 	fmt.Println("Feed Name:", feed.Name)
 	fmt.Println("Feed Url:", feed.Url)
-	return nil
-}
-
-func aggregate(s *state, cmd command) error {
-	rssStruct, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
-	if err != nil {
-		return fmt.Errorf("error while fetching data: %w", err)
-	}
-	processXML(rssStruct)
-	for _, item := range rssStruct.Channel.Item {
-		fmt.Println(item.Title)
-		fmt.Println(item.Description)
-		fmt.Printf("\n----------------------------------------------------\n")
-	}
 	return nil
 }

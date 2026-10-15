@@ -28,23 +28,25 @@ type RSSItem struct {
 func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	rssStruct := &RSSFeed{}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, feedURL, nil)
-	req.Header.Set(req.UserAgent(), "gator")
 	if err != nil {
-		return &RSSFeed{}, fmt.Errorf("fail when making request: %w", err)
+		return nil, fmt.Errorf("fail when making request: %w", err)
 	}
+	req.Header.Set("User-Agent", "gator")
 
 	client := http.DefaultClient
 	resp, err := client.Do(req)
 	if err != nil {
-		return &RSSFeed{}, fmt.Errorf("fail getting response: %w", err)
+		return nil, fmt.Errorf("fail getting response: %w", err)
 	}
 	defer resp.Body.Close()
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &RSSFeed{}, fmt.Errorf("fail when reading response: %w", err)
+		return nil, fmt.Errorf("fail when reading response: %w", err)
 	}
-	xml.Unmarshal(data, rssStruct)
+	if err := xml.Unmarshal(data, rssStruct); err != nil {
+		return nil, fmt.Errorf("fail unmarshaling xml data: %w", err)
+	}
 	return rssStruct, nil
 }
 
