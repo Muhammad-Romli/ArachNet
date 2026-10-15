@@ -42,6 +42,7 @@ func main() {
 	mainCommands.register("register", handlerRegister)
 	mainCommands.register("reset", handlerReset)
 	mainCommands.register("users", handlerUsers)
+	mainCommands.register("agg", aggregate)
 
 	mainState := state{}
 	mainState.cfg = data

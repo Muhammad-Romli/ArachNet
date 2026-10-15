@@ -134,3 +134,17 @@ func handlerAddFeed(s *state, cmd command) error {
 	fmt.Println("Feed Url:", feed.Url)
 	return nil
 }
+
+func aggregate(s *state, cmd command) error {
+	rssStruct, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return fmt.Errorf("error while fetching data: %w", err)
+	}
+	processXML(rssStruct)
+	for _, item := range rssStruct.Channel.Item {
+		fmt.Println(item.Title)
+		fmt.Println(item.Description)
+		fmt.Printf("\n----------------------------------------------------\n")
+	}
+	return nil
+}

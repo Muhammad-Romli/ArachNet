@@ -26,7 +26,7 @@ type RSSItem struct {
 }
 
 func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
-	RSSstruct := &RSSFeed{}
+	rssStruct := &RSSFeed{}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, feedURL, nil)
 	req.Header.Set(req.UserAgent(), "gator")
 	if err != nil {
@@ -34,17 +34,18 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	}
 
 	client := http.DefaultClient
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return &RSSFeed{}, fmt.Errorf("fail getting response: %w", err)
 	}
+	defer resp.Body.Close()
 
-	data, err := io.ReadAll(res.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return &RSSFeed{}, fmt.Errorf("fail when reading response: %w", err)
 	}
-	xml.Unmarshal(data, RSSstruct)
-	return RSSstruct, nil
+	xml.Unmarshal(data, rssStruct)
+	return rssStruct, nil
 }
 
 func processXML(feed *RSSFeed) {
@@ -55,17 +56,4 @@ func processXML(feed *RSSFeed) {
 		items[i].Title = html.UnescapeString(items[i].Title)
 		items[i].Description = html.UnescapeString(items[i].Description)
 	}
-}
-
-func aggregate() error {
-	resp, err := http.Get("https://www.wagslane.dev/index.xml")
-	if err != nil {
-		return fmt.Errorf("fail when fetching data: %w", err)
-	}
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("error reading data: %w", err)
-	}
-	fmt.Println(data)
-	return nil
 }
