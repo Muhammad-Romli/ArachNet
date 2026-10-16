@@ -43,6 +43,7 @@ func main() {
 	mainCommands.register("reset", handlerReset)
 	mainCommands.register("users", handlerUsers)
 	mainCommands.register("agg", aggregate)
+	mainCommands.register("addfeed", handlerAddFeed)
 
 	mainState := state{}
 	mainState.cfg = data

@@ -29,7 +29,7 @@ type commands struct {
 func (c *commands) run(s *state, cmd command) error {
 	function, ok := c.CommandsMap[cmd.Name]
 	if !ok {
-		return fmt.Errorf("Value doesn't exist")
+		return fmt.Errorf("Your command doesn't exist in register CommandsMap")
 	}
 	err := function(s, cmd)
 	if err != nil {
