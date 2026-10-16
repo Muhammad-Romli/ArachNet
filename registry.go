@@ -105,7 +105,7 @@ func handlerUsers(s *state, cmd command) error {
 	return nil
 }
 
-func aggregate(s *state, cmd command) error {
+func handlerAggregate(s *state, cmd command) error {
 	rssStruct, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
 	if err != nil {
 		return fmt.Errorf("error while fetching data: %w", err)
@@ -146,5 +146,20 @@ func handlerAddFeed(s *state, cmd command) error {
 	fmt.Println("Feed ID:", feed.ID)
 	fmt.Println("Feed Name:", feed.Name)
 	fmt.Println("Feed Url:", feed.Url)
+	return nil
+}
+
+func handlerListFeeds(s *state, cmd command) error {
+	feeds, err := s.db.GetListFeeds(context.Background())
+	if err != nil {
+		return fmt.Errorf("fail when getting list feeds from database: %w", err)
+	}
+	fmt.Print("\n")
+	for _, f := range feeds {
+		fmt.Println("Feed name:", f.Name)
+		fmt.Println("URL:", f.Url)
+		fmt.Println("Username:", f.UserName)
+		fmt.Println("\n----------------------------------------------\n")
+	}
 	return nil
 }
