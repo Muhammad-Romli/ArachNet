@@ -10,6 +10,10 @@ VALUES (
 )
 RETURNING *;
 
+-- name: GetFeedByURL :one
+SELECT * FROM feeds
+WHERE url = $1;
+
 -- name: GetListFeeds :many
 SELECT feeds.*, users.name AS user_name
 FROM feeds

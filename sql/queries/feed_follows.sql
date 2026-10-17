@@ -14,12 +14,3 @@ FROM inserted_feed_follow inserted
 INNER JOIN users ON inserted.user_id = users.id
 INNER JOIN feeds ON inserted.feed_id = feeds.id;
 
---name: GetFeedFollowsUser 
-SELECT 
-    feeds_follow.*
-    feeds.name AS feed_name,
-    users.name AS user_name
-FROM feeds_follow
-INNER JOIN users ON feed_follows.user_id = users.id
-INNER JOIN feeds ON feed_follows.feed_id = feeds.id
-WHERE feed_follows.user_id = $1;
