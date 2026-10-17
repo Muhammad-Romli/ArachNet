@@ -44,7 +44,7 @@ func (c *commands) register(name string, f func(*state, command) error) {
 
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.Args) < 1 { // main.go already take care of the Args of the command so param start from 0
-		return fmt.Errorf("Login function need 1 parameter at least")
+		return fmt.Errorf("Login function need 1 parameter at least, needed: user_name")
 	}
 	name := cmd.Args[0]
 	user, err := s.db.GetUser(context.Background(), name)
@@ -59,7 +59,7 @@ func handlerLogin(s *state, cmd command) error {
 
 func handlerRegister(s *state, cmd command) error {
 	if len(cmd.Args) < 1 {
-		return fmt.Errorf("Register function need 1 parameter at least")
+		return fmt.Errorf("Register function need 1 parameter at least, needed: user_name")
 	}
 	id := uuid.New()
 	createdAt := time.Now()
@@ -161,5 +161,36 @@ func handlerListFeeds(s *state, cmd command) error {
 		fmt.Println("Username:", f.UserName)
 		fmt.Println("\n----------------------------------------------")
 	}
+	return nil
+}
+
+func handlerFollow(s *state, cmd command) error {
+	if len(cmd.Args) < 1 {
+		return fmt.Errorf("Follow function need 1 parameter at least, needed: feed_url")
+	}
+	url := cmd.Args[0]
+	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	if err != nil {
+		return fmt.Errorf("fail getting user info from database: %w", err)
+	}
+	feed, err := s.db.GetFeedByURL(context.Background(), url)
+	if err != nil {
+		return fmt.Errorf("fail getting feed info from database: %w", err)
+	}
+	params := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	}
+	feedFollow, err := s.db.CreateFeedFollow(context.Background(), params)
+	if err != nil {
+		return fmt.Errorf("fail inserting follow information to database: %w", err)
+	}
+	fmt.Println("Congratulations you succesfully follow the feed")
+	fmt.Println("Your ID:", feedFollow.UserID)
+	fmt.Println("Followed feed ID:", feedFollow.FeedID)
+	fmt.Println("Followed feed URL:", cmd.Args[0])
 	return nil
 }
