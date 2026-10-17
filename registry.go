@@ -159,7 +159,7 @@ func handlerListFeeds(s *state, cmd command) error {
 		fmt.Println("Feed name:", f.Name)
 		fmt.Println("URL:", f.Url)
 		fmt.Println("Username:", f.UserName)
-		fmt.Println("\n----------------------------------------------\n")
+		fmt.Println("\n----------------------------------------------")
 	}
 	return nil
 }
