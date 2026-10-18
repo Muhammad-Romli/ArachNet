@@ -160,6 +160,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	tempCmd := command{
 		Args: []string{feed.Url},
 	}
+	fmt.Println("==============================================")
 	if err = handlerFollow(s, tempCmd, user); err != nil {
 		return fmt.Errorf("fail following created feed, feed is created: %w", err)
 	}
