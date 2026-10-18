@@ -53,7 +53,8 @@ func handlerLogin(s *state, cmd command) error {
 	}
 	s.cfg.SetUser(name)
 	fmt.Println("User has been set:")
-	fmt.Println(user)
+	fmt.Println("User ID:", user.ID)
+	fmt.Println("User Name:", user.Name)
 	return nil
 }
 
