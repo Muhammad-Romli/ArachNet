@@ -43,7 +43,7 @@ func (c *commands) register(name string, f func(*state, command) error) {
 }
 
 func getFeedByUrl(s *state, url string) (database.Feed, error) {
-	feed, err := s.db.GetFeedByName(context.Background(), url)
+	feed, err := s.db.GetFeedByURL(context.Background(), url)
 	if err != nil {
 		return database.Feed{}, fmt.Errorf("fail getting feed info from database by url: %w", err)
 	}
@@ -162,9 +162,10 @@ func handlerAddFeed(s *state, cmd command) error {
 	fmt.Println("Feed ID:", feed.ID)
 	fmt.Println("Feed Name:", feed.Name)
 	fmt.Println("Feed Url:", feed.Url)
-	tempCmd := command{}
-	tempCmd.Args[0] = feed.Url
-	if err = handlerFollow(s, cmd); err != nil {
+	tempCmd := command{
+		Args: []string{feed.Url},
+	}
+	if err = handlerFollow(s, tempCmd); err != nil {
 		return fmt.Errorf("fail following created feed, feed is created: %w", err)
 	}
 	return nil
@@ -195,20 +196,13 @@ func handlerFollow(s *state, cmd command) error {
 		return fmt.Errorf("fail getting user info from database: %w", err)
 	}
 
-	errCount := 0
-
-	feed, err1 := getFeedByUrl(s, query)
-	if err1 != nil {
-		errCount += 1
-	}
-	feed, err2 := getFeedByName(s, query)
-	if err2 != nil {
-		errCount += 1
-	}
-
-	if errCount >= 2 {
-		errMessage := fmt.Errorf("fail getting feed by either name and url:\n error by Url: %w \n error by Name: %w", err1, err2)
-		return errMessage
+	feed, errURL := getFeedByUrl(s, query)
+	if errURL != nil {
+		var errName error
+		feed, errName = getFeedByName(s, query)
+		if errName != nil {
+			return fmt.Errorf("fail getting feed by either name and url:\n error by Url: %w\n error by Name: %w", errURL, errName)
+		}
 	}
 
 	params := database.CreateFeedFollowParams{
