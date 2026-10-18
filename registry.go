@@ -58,6 +58,18 @@ func getFeedByName(s *state, name string) (database.Feed, error) {
 	return feed, nil
 }
 
+func getFeedByAll(s *state, query string) (database.Feed, error) {
+	feed, errURL := getFeedByUrl(s, query)
+	if errURL != nil {
+		var errName error
+		feed, errName = getFeedByName(s, query)
+		if errName != nil {
+			return database.Feed{}, fmt.Errorf("fail getting feed by either name and url:\n error by Url: %w\n error by Name: %w", errURL, errName)
+		}
+	}
+	return feed, nil
+}
+
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.Args) < 1 { // main.go already take care of the Args of the command so param start from 0
 		return fmt.Errorf("Login function need 1 parameter at least, needed: user_name")
@@ -184,17 +196,13 @@ func handlerListFeeds(s *state, cmd command) error {
 
 func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) < 1 {
-		return fmt.Errorf("Follow function need 1 parameter at least, needed: feed_url")
+		return fmt.Errorf("Follow function need 1 parameter at least, needed: feed_url or feed_name")
 	}
 	query := cmd.Args[0]
 
-	feed, errURL := getFeedByUrl(s, query)
-	if errURL != nil {
-		var errName error
-		feed, errName = getFeedByName(s, query)
-		if errName != nil {
-			return fmt.Errorf("fail getting feed by either name and url:\n error by Url: %w\n error by Name: %w", errURL, errName)
-		}
+	feed, err := getFeedByAll(s, query)
+	if err != nil {
+		return err
 	}
 
 	params := database.CreateFeedFollowParams{
@@ -229,5 +237,24 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 		fmt.Println("Feed Name:", f.FeedName)
 	}
 	fmt.Println("==================================================")
+	return nil
+}
+
+func handlerUnfollowing(s *state, cmd command, user database.User) error {
+	if len(cmd.Args) < 1 {
+		return fmt.Errorf("unfollow function need 1 parameter at least, needed: feed_url or feed_name")
+	}
+	query := cmd.Args[0]
+	feed, err := getFeedByAll(s, query)
+	if err != nil {
+		return err
+	}
+	params := database.UnfollowingFeedParams{
+		UserID: user.ID,
+		FeedID: feed.ID,
+	}
+	if err := s.db.UnfollowingFeed(context.Background(), params); err != nil {
+		return fmt.Errorf("fail unfollowing feed: %w", err)
+	}
 	return nil
 }
