@@ -15,6 +15,7 @@ INNER JOIN users ON inserted.user_id = users.id
 INNER JOIN feeds ON inserted.feed_id = feeds.id;
 
 -- name: ListFollowing :many
-SELECT ff.id, ff.user_id, ff.feed_id, feeds.name AS feed_name FROM feed_follows ff
+SELECT ff.id, ff.user_id, ff.feed_id, feeds.name AS feed_name
+FROM feed_follows ff
 INNER JOIN feeds ON ff.feed_id = feeds.id
 WHERE ff.user_id = $1;

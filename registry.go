@@ -196,3 +196,17 @@ func handlerFollow(s *state, cmd command) error {
 	fmt.Println("Followed feed URL:", cmd.Args[0])
 	return nil
 }
+
+/*func handlerFollowing(s *state, cmd command) error {
+	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	if err != nil {
+		return fmt.Errorf("fail getting user info: %w", err)
+	}
+	feedsFollowed, err := s.db.ListFollowing(context.Background(), user.ID)
+	for _, f := range feedsFollowed {
+		fmt.Println("")
+		fmt.Println("")
+		fmt.Println("")
+	}
+}
+*/

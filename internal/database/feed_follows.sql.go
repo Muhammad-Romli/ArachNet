@@ -69,25 +69,16 @@ func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowPara
 }
 
 const listFollowing = `-- name: ListFollowing :many
-
-SELECT ff.id, ff.created_at, ff.updated_at, ff.user_id, feed_id, feeds.id, feeds.created_at, feeds.updated_at, name, url, feeds.user_id, feeds.name AS feed_name FROM feed_follows ff
-INNER JOIN feeds ON ff.feeds.id = feeds.id
+SELECT ff.id, ff.user_id, ff.feed_id, feeds.name AS feed_name FROM feed_follows ff
+INNER JOIN feeds ON ff.feed_id = feeds.id
 WHERE ff.user_id = $1
 `
 
 type ListFollowingRow struct {
-	ID          uuid.UUID
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	UserID      uuid.UUID
-	FeedID      uuid.UUID
-	ID_2        uuid.UUID
-	CreatedAt_2 time.Time
-	UpdatedAt_2 time.Time
-	Name        string
-	Url         string
-	UserID_2    uuid.UUID
-	FeedName    string
+	ID       uuid.UUID
+	UserID   uuid.UUID
+	FeedID   uuid.UUID
+	FeedName string
 }
 
 func (q *Queries) ListFollowing(ctx context.Context, userID uuid.UUID) ([]ListFollowingRow, error) {
@@ -101,16 +92,8 @@ func (q *Queries) ListFollowing(ctx context.Context, userID uuid.UUID) ([]ListFo
 		var i ListFollowingRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
 			&i.UserID,
 			&i.FeedID,
-			&i.ID_2,
-			&i.CreatedAt_2,
-			&i.UpdatedAt_2,
-			&i.Name,
-			&i.Url,
-			&i.UserID_2,
 			&i.FeedName,
 		); err != nil {
 			return nil, err
