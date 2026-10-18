@@ -45,6 +45,8 @@ func main() {
 	mainCommands.register("agg", handlerAggregate)
 	mainCommands.register("addfeed", handlerAddFeed)
 	mainCommands.register("feeds", handlerListFeeds)
+	mainCommands.register("follow", handlerFollow)
+	mainCommands.register("following", handlerFollowing)
 
 	mainState := state{}
 	mainState.cfg = data
