@@ -42,6 +42,22 @@ func (c *commands) register(name string, f func(*state, command) error) {
 	c.CommandsMap[name] = f
 }
 
+func getFeedByUrl(s *state, url string) (database.Feed, error) {
+	feed, err := s.db.GetFeedByName(context.Background(), url)
+	if err != nil {
+		return database.Feed{}, fmt.Errorf("fail getting feed info from database by url: %w", err)
+	}
+	return feed, nil
+}
+
+func getFeedByName(s *state, name string) (database.Feed, error) {
+	feed, err := s.db.GetFeedByName(context.Background(), name)
+	if err != nil {
+		return database.Feed{}, fmt.Errorf("fail getting feed info from database by name: %w", err)
+	}
+	return feed, nil
+}
+
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.Args) < 1 { // main.go already take care of the Args of the command so param start from 0
 		return fmt.Errorf("Login function need 1 parameter at least, needed: user_name")
@@ -146,6 +162,8 @@ func handlerAddFeed(s *state, cmd command) error {
 	fmt.Println("Feed ID:", feed.ID)
 	fmt.Println("Feed Name:", feed.Name)
 	fmt.Println("Feed Url:", feed.Url)
+	tempCmd := command{}
+	tempCmd.Args[0] = feed.Url
 	if err = handlerFollow(s, cmd); err != nil {
 		return fmt.Errorf("fail following created feed, feed is created: %w", err)
 	}
@@ -180,11 +198,11 @@ func handlerFollow(s *state, cmd command) error {
 	errCount := 0
 
 	feed, err1 := getFeedByUrl(s, query)
-	if err != nil {
+	if err1 != nil {
 		errCount += 1
 	}
 	feed, err2 := getFeedByName(s, query)
-	if err != nil {
+	if err2 != nil {
 		errCount += 1
 	}
 
@@ -209,22 +227,6 @@ func handlerFollow(s *state, cmd command) error {
 	fmt.Println("Followed feed ID:", feedFollow.FeedID)
 	fmt.Println("Followed feed URL:", cmd.Args[0])
 	return nil
-}
-
-func getFeedByUrl(s *state, url string) (database.Feed, error) {
-	feed, err := s.db.GetFeedByName(context.Background(), url)
-	if err != nil {
-		return database.Feed{}, fmt.Errorf("fail getting feed info from database by url: %w", err)
-	}
-	return feed, nil
-}
-
-func getFeedByName(s *state, name string) (database.Feed, error) {
-	feed, err := s.db.GetFeedByName(context.Background(), name)
-	if err != nil {
-		return database.Feed{}, fmt.Errorf("fail getting feed info from database by name: %w", err)
-	}
-	return feed, nil
 }
 
 func handlerFollowing(s *state, cmd command) error {
