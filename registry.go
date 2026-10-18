@@ -136,15 +136,10 @@ func handlerAggregate(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) < 2 { // main.go already take care of the Args of the command so param start from 0
 		return fmt.Errorf("addfeed command need 2 parameters at least, name and url")
 	}
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("fail getting user info: %w", err)
-	}
-
 	feedParams := database.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
@@ -165,7 +160,7 @@ func handlerAddFeed(s *state, cmd command) error {
 	tempCmd := command{
 		Args: []string{feed.Url},
 	}
-	if err = handlerFollow(s, tempCmd); err != nil {
+	if err = handlerFollow(s, tempCmd, user); err != nil {
 		return fmt.Errorf("fail following created feed, feed is created: %w", err)
 	}
 	return nil
@@ -186,15 +181,11 @@ func handlerListFeeds(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) < 1 {
 		return fmt.Errorf("Follow function need 1 parameter at least, needed: feed_url")
 	}
 	query := cmd.Args[0]
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("fail getting user info from database: %w", err)
-	}
 
 	feed, errURL := getFeedByUrl(s, query)
 	if errURL != nil {
@@ -223,12 +214,11 @@ func handlerFollow(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollowing(s *state, cmd command) error {
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("fail getting user info: %w", err)
-	}
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	feedsFollowed, err := s.db.ListFollowing(context.Background(), user.ID)
+	if err != nil {
+		return fmt.Errorf("failed getting list of followed feeds: %w", err)
+	}
 	fmt.Println("==================================================")
 	fmt.Println("Your ID:", user.ID)
 	fmt.Printf("Feed that you have followed:\n")
