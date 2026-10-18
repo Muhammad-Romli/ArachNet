@@ -69,7 +69,8 @@ func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowPara
 }
 
 const listFollowing = `-- name: ListFollowing :many
-SELECT ff.id, ff.user_id, ff.feed_id, feeds.name AS feed_name FROM feed_follows ff
+SELECT ff.id, ff.user_id, ff.feed_id, feeds.name AS feed_name
+FROM feed_follows ff
 INNER JOIN feeds ON ff.feed_id = feeds.id
 WHERE ff.user_id = $1
 `
