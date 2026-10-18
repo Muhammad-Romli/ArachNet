@@ -197,16 +197,20 @@ func handlerFollow(s *state, cmd command) error {
 	return nil
 }
 
-/*func handlerFollowing(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command) error {
 	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
 	if err != nil {
 		return fmt.Errorf("fail getting user info: %w", err)
 	}
 	feedsFollowed, err := s.db.ListFollowing(context.Background(), user.ID)
+	fmt.Println("==================================================")
+	fmt.Println("Your ID:", user.ID)
+	fmt.Printf("Feed that you have followed:\n")
 	for _, f := range feedsFollowed {
-		fmt.Println("")
-		fmt.Println("")
-		fmt.Println("")
+		fmt.Println("-------------------------------------------------")
+		fmt.Println("Feed ID:", f.FeedID)
+		fmt.Println("Feed Name:", f.FeedName)
 	}
+	fmt.Println("==================================================")
+	return nil
 }
-*/
