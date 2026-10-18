@@ -19,3 +19,8 @@ SELECT ff.id, ff.user_id, ff.feed_id, feeds.name AS feed_name
 FROM feed_follows ff
 INNER JOIN feeds ON ff.feed_id = feeds.id
 WHERE ff.user_id = $1;
+
+-- name: unfollowingFeed :exec
+DELETE FROM feed_follows ff
+WHERE ff.user_id = $1
+AND ff.feed_id = $2;
