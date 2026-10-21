@@ -135,21 +135,24 @@ func handlerUsers(s *state, cmd command) error {
 }
 
 func handlerAggregate(s *state, cmd command) error {
-	rssStruct, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
-	if err != nil {
-		return fmt.Errorf("error while fetching data: %w", err)
+	timeBetweenReqs := 30 * time.Second
+	if len(cmd.Args) >= 1 {
+		parsed, err := time.ParseDuration(cmd.Args[0])
+		if err != nil {
+			return fmt.Errorf("fail parsing time: %w", err)
+		}
+		timeBetweenReqs = parsed
 	}
-	processXML(rssStruct)
-	for _, item := range rssStruct.Channel.Item {
-		fmt.Println(item.Title)
-		fmt.Println(item.Description)
-		fmt.Printf("\n----------------------------------------------------\n")
+	ticker := time.NewTicker(timeBetweenReqs)
+	for ; ; <-ticker.C {
+		if err := scrapeFeeds(s); err != nil {
+			return err
+		}
 	}
-	return nil
 }
 
 func handlerAddFeed(s *state, cmd command, user database.User) error {
-	if len(cmd.Args) < 2 { // main.go already take care of the Args of the command so param start from 0
+	if len(cmd.Args) < 2 {
 		return fmt.Errorf("addfeed command need 2 parameters at least, name and url")
 	}
 	feedParams := database.CreateFeedParams{

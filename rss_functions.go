@@ -59,3 +59,21 @@ func processXML(feed *RSSFeed) {
 		items[i].Description = html.UnescapeString(items[i].Description)
 	}
 }
+
+func scrapeFeeds(s *state) error {
+	feed, err := s.db.GetNextFeedToFetch(context.Background())
+	if err != nil {
+		return fmt.Errorf("fail getting new feed to fetch: %w", err)
+	}
+	s.db.MarkFeedFetched(context.Background(), feed.ID)
+	fetchedFeed, err := fetchFeed(context.Background(), feed.Url)
+	if err != nil {
+		return err
+	}
+	for _, item := range fetchedFeed.Channel.Item {
+		fmt.Println(item.Title)
+		fmt.Println(item.Description)
+		fmt.Printf("\n----------------------------------------------------\n")
+	}
+	return nil
+}
