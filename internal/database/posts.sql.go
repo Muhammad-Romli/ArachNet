@@ -25,8 +25,8 @@ type CreatePostParams struct {
 	UpdatedAt   time.Time
 	Title       string
 	Url         string
-	Description sql.NullString
-	PublishedAt time.Time
+	Description string
+	PublishedAt sql.NullTime
 	FeedID      uuid.UUID
 }
 

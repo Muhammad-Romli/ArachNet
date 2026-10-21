@@ -2,11 +2,17 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/xml"
 	"fmt"
 	"html"
 	"io"
 	"net/http"
+	"regexp"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/muhammad-romli/ArachNet/internal/database"
 )
 
 type RSSFeed struct {
@@ -61,19 +67,37 @@ func processXML(feed *RSSFeed) {
 }
 
 func scrapeFeeds(s *state) error {
-	feed, err := s.db.GetNextFeedToFetch(context.Background())
+	dbFeed, err := s.db.GetNextFeedToFetch(context.Background())
 	if err != nil {
 		return fmt.Errorf("fail getting new feed to fetch: %w", err)
 	}
-	s.db.MarkFeedFetched(context.Background(), feed.ID)
-	fetchedFeed, err := fetchFeed(context.Background(), feed.Url)
+	s.db.MarkFeedFetched(context.Background(), dbFeed.ID)
+	rssFeed, err := fetchFeed(context.Background(), dbFeed.Url)
 	if err != nil {
 		return err
 	}
-	for _, item := range fetchedFeed.Channel.Item {
-		fmt.Println(item.Title)
-		fmt.Println(item.Description)
-		fmt.Printf("\n----------------------------------------------------\n")
+	processXML(rssFeed)
+	for _, item := range rssFeed.Channel.Item {
+		publishedAt := sql.NullTime{} // Valid: false, stored as NULL
+		if t, err := time.Parse(time.RFC1123Z, item.PubDate); err == nil {
+			publishedAt = sql.NullTime{Time: t, Valid: true}
+		}
+		params := database.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+			Title:       item.Title,
+			Url:         item.Link,
+			Description: item.Description,
+			PublishedAt: publishedAt,
+			FeedID:      dbFeed.ID,
+		}
+		s.db.CreatePost(context.Background(), params)
 	}
 	return nil
+}
+
+func stripHTML(input string) string { // Because some sites like hacker news doesn't have description
+	re := regexp.MustCompile("<[^>]*>")
+	return re.ReplaceAllString(input, "")
 }
