@@ -22,3 +22,9 @@ WHERE name = $1;
 SELECT feeds.*, users.name AS user_name
 FROM feeds
 INNER JOIN users ON feeds.user_id = users.id;
+
+-- name: MarkFeedFetched :exec
+UPDATE feeds
+SET last_fetched_at = NOW(),
+    last_updated = NOW()
+WHERE $1 = name OR $1 = url;

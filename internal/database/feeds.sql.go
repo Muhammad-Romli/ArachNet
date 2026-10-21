@@ -139,3 +139,15 @@ func (q *Queries) GetListFeeds(ctx context.Context) ([]GetListFeedsRow, error) {
 	}
 	return items, nil
 }
+
+const markFeedFetched = `-- name: MarkFeedFetched :exec
+UPDATE feeds
+SET last_fetched_at = NOW(),
+    last_updated = NOW()
+WHERE $1 = name OR $1 = url
+`
+
+func (q *Queries) MarkFeedFetched(ctx context.Context, name string) error {
+	_, err := q.db.ExecContext(ctx, markFeedFetched, name)
+	return err
+}
