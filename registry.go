@@ -324,7 +324,7 @@ func printPosts(posts []database.Post) {
 		fmt.Println("ID:", post.ID)
 		fmt.Println("Description:", post.Description)
 		fmt.Println("URL:", post.Url)
-		fmt.Println("Feed ID", post.FeedID)
+		fmt.Println("Feed ID:", post.FeedID)
 		fmt.Println("-------------------------------------")
 	}
 }
