@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"html"
 	"io"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"github.com/muhammad-romli/ArachNet/internal/database"
 )
 
@@ -92,7 +94,14 @@ func scrapeFeeds(s *state) error {
 			PublishedAt: publishedAt,
 			FeedID:      dbFeed.ID,
 		}
-		s.db.CreatePost(context.Background(), params)
+		_, err := s.db.CreatePost(context.Background(), params)
+		if err != nil {
+			var pqErr *pq.Error
+			if errors.As(err, &pqErr) && pqErr.Code == "23505" {
+				continue // duplicate, skip it
+			}
+			return fmt.Errorf("fail to create post: %w", err)
+		}
 	}
 	return nil
 }

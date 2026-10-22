@@ -49,6 +49,9 @@ func main() {
 	mainCommands.register("follow", middlewareLoggedIn(handlerFollow))
 	mainCommands.register("following", middlewareLoggedIn(handlerFollowing))
 	mainCommands.register("unfollow", middlewareLoggedIn(handlerUnfollowing))
+	mainCommands.register("posts", handlerPosts)
+	mainCommands.register("browse", handlerBrowse)
+	mainCommands.register("postByID", handlerPostById)
 
 	mainState := state{}
 	mainState.cfg = data

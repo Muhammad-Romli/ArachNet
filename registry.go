@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -260,4 +261,70 @@ func handlerUnfollowing(s *state, cmd command, user database.User) error {
 		return fmt.Errorf("fail unfollowing feed: %w", err)
 	}
 	return nil
+}
+
+func handlerPosts(s *state, cmd command) error {
+	limit := 20
+	if len(cmd.Args) >= 1 {
+		n, err := strconv.Atoi(cmd.Args[0])
+		if err != nil {
+			return fmt.Errorf("invalid limit %q: must be a number", cmd.Args[0])
+		}
+		if limit <= 0 {
+			return fmt.Errorf("limit can't be 0 or negative")
+		}
+		limit = n
+	}
+	posts, err := s.db.GetPosts(context.Background(), int32(limit))
+	if err != nil {
+		return fmt.Errorf("fail getting posts from database: %w", err)
+	}
+	printPosts(posts)
+	return nil
+}
+
+func handlerBrowse(s *state, cmd command) error {
+	if len(cmd.Args) < 1 {
+		return fmt.Errorf("browser command need 1 parameter at least, query(title or url)")
+	}
+	query := cmd.Args[0]
+	limit := 2
+	posts, err := s.db.SearchPosts(context.Background(), database.SearchPostsParams{
+		SearchText: query,
+		RowLimit:   int32(limit),
+	})
+	if err != nil {
+		return fmt.Errorf("fail searching posts in database: %w", err)
+	}
+	printPosts(posts)
+	return nil
+}
+
+func handlerPostById(s *state, cmd command) error {
+	if len(cmd.Args) < 1 {
+		return fmt.Errorf("postById command need 1 parameter at least, postById <id>")
+	}
+	id, err := uuid.Parse(cmd.Args[0])
+	if err != nil {
+		return fmt.Errorf("fail parsing uuid: %w", err)
+	}
+	post, err := s.db.GetPostByID(context.Background(), id)
+	if err != nil {
+		return fmt.Errorf("fail getting post by id: %w", err)
+	}
+	printPosts([]database.Post{post})
+	return nil
+}
+
+func printPosts(posts []database.Post) {
+	fmt.Println("List of posts:")
+	fmt.Println("================================")
+	for _, post := range posts {
+		fmt.Println("Title:", post.Title)
+		fmt.Println("ID:", post.ID)
+		fmt.Println("Description:", post.Description)
+		fmt.Println("URL:", post.Url)
+		fmt.Println("Feed ID", post.FeedID)
+		fmt.Println("-------------------------------------")
+	}
 }

@@ -7,3 +7,15 @@ RETURNING *;
 SELECT * FROM posts
 ORDER BY created_at DESC
 LIMIT $1;
+
+-- name: SearchPosts :many
+SELECT *
+FROM posts
+WHERE (title ILIKE '%' || sqlc.arg(search_text)::text || '%'
+       OR url ILIKE '%' || sqlc.arg(search_text)::text || '%')
+ORDER BY published_at DESC
+LIMIT sqlc.arg(row_limit);
+
+
+-- name: GetPostByID :one
+SELECT * FROM posts WHERE id = $1;
